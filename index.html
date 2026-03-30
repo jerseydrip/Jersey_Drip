@@ -265,6 +265,9 @@
             <option value="">— Taglia —</option>
             <option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option>
           </select>
+          <input type="text" class="size-select" id="customName-${j.id}" placeholder="Nome sulla maglia (opzionale)" style="margin-top:6px;">
+          <input type="text" class="size-select" id="customNumber-${j.id}" placeholder="Numero sulla maglia (opzionale)" style="margin-top:6px;">
+          <div style="font-family:'Space Mono',monospace;font-size:0.5rem;letter-spacing:2px;color:var(--green);margin-top:6px;">✓ PERSONALIZZAZIONE GRATUITA</div>
           <button class="add-to-cart-btn" onclick="addToCart(${j.id})">+ Aggiungi al carrello</button>
         </div>
       </div>`;
@@ -282,8 +285,9 @@
     const sizeEl = document.getElementById('size-' + id);
     const size = sizeEl ? sizeEl.value : '';
     if (!size) { showToast('Seleziona una taglia!'); return; }
-    const existing = cart.find(i => i.id === id && i.size === size);
-    if (existing) { existing.qty++; } else { cart.push({ id, name:j.name, club:j.club, size, price:j.price, img:j.imgFront||'', qty:1 }); }
+    const customName = (document.getElementById('customName-' + id)?.value || '').trim().toUpperCase();
+    const customNumber = (document.getElementById('customNumber-' + id)?.value || '').trim();
+    cart.push({ id, name:j.name, club:j.club, size, price:j.price, img:j.imgFront||'', qty:1, customName, customNumber });
     updateCartUI();
     showToast(j.name + ' aggiunto ✓');
   }
@@ -304,7 +308,7 @@
         ${i.img ? `<img class="cart-item-img" src="${i.img}">` : `<div class="cart-item-img" style="display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:rgba(201,168,76,0.3);">${(i.club||'').slice(0,3).toUpperCase()}</div>`}
         <div class="cart-item-info">
           <div class="cart-item-name">${i.name}</div>
-          <div class="cart-item-meta">Taglia: ${i.size} · Qtà: ${i.qty}</div>
+          <div class="cart-item-meta">Taglia: ${i.size} · Qtà: ${i.qty}${i.customName ? ' · Nome: '+i.customName : ''}${i.customNumber ? ' · #'+i.customNumber : ''}</div>
         </div>
         <div class="cart-item-price">€${(i.price*i.qty).toLocaleString('it-IT',{minimumFractionDigits:2})}</div>
         <button class="cart-item-remove" onclick="removeFromCart(${i.id},'${i.size}')">✕</button>
