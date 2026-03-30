@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jersey Drip — Maglie da Calcio Premium</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C9A84C; --gold-light: #E8C96A; --gold-pale: #F5E6B8;
+    --black: #0A0A0A; --dark: #111111; --dark2: #1A1A1A; --dark3: #222222;
+    --white: #F9F5EC; --gray: #888; --red: #C0392B; --green: #27AE60;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--black); color: var(--white); font-family: 'Cormorant Garamond', serif; min-height: 100vh; overflow-x: hidden; }
+  header { position: sticky; top: 0; z-index: 100; background: rgba(10,10,10,0.96); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(201,168,76,0.25); padding: 0 40px; display: flex; align-items: center; justify-content: space-between; height: 70px; }
+  .logo { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 4px; color: var(--gold); text-shadow: 0 0 30px rgba(201,168,76,0.4); }
+  .logo span { color: var(--white); }
+  nav { display: flex; gap: 32px; align-items: center; }
+  nav a { font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 3px; text-transform: uppercase; color: var(--gray); text-decoration: none; transition: color 0.2s; cursor: pointer; }
+  nav a:hover, nav a.active { color: var(--gold); }
+  .hero { padding: 80px 40px 60px; position: relative; overflow: hidden; }
+  .hero::before { content: 'JERSEY DRIP'; position: absolute; font-family: 'Bebas Neue', sans-serif; font-size: 18vw; color: rgba(201,168,76,0.04); top: 50%; left: 50%; transform: translate(-50%, -50%); white-space: nowrap; pointer-events: none; letter-spacing: 10px; }
+  .hero-label { font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 5px; color: var(--gold); text-transform: uppercase; margin-bottom: 16px; }
+  .hero h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(3rem, 7vw, 6rem); letter-spacing: 3px; line-height: 0.9; color: var(--white); }
+  .hero h1 em { font-style: italic; font-family: 'Cormorant Garamond', serif; font-weight: 300; color: var(--gold); }
+  .stats-bar { display: flex; gap: 0; margin: 50px 40px; border: 1px solid rgba(201,168,76,0.2); }
+  .stat { flex: 1; padding: 24px 32px; border-right: 1px solid rgba(201,168,76,0.2); }
+  .stat:last-child { border-right: none; }
+  .stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; color: var(--gold); letter-spacing: 2px; display: block; }
+  .stat-label { font-family: 'Space Mono', monospace; font-size: 0.55rem; letter-spacing: 3px; color: var(--gray); text-transform: uppercase; margin-top: 4px; }
+  .filters { padding: 0 40px 32px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .filter-btn { background: transparent; border: 1px solid rgba(201,168,76,0.25); color: var(--gray); padding: 8px 20px; font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
+  .filter-btn:hover, .filter-btn.active { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.05); }
+  .category-select { background: var(--dark2); border: 1px solid rgba(201,168,76,0.3); color: var(--gold); padding: 8px 20px; font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; outline: none; transition: all 0.2s; }
+  .category-select:hover, .category-select:focus { border-color: var(--gold); background: rgba(201,168,76,0.05); }
+  .category-select option { background: var(--dark2); color: var(--white); text-transform: none; }
+  .search-wrap { margin-left: auto; position: relative; }
+  .search-wrap input { background: var(--dark2); border: 1px solid rgba(201,168,76,0.2); color: var(--white); padding: 8px 36px 8px 16px; font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 1px; width: 220px; outline: none; transition: border-color 0.2s; }
+  .search-wrap input:focus { border-color: var(--gold); }
+  .search-wrap input::placeholder { color: var(--gray); }
+  .search-icon { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--gray); font-size: 0.7rem; pointer-events: none; }
+  .catalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 2px; padding: 0 40px 80px; }
+  .jersey-card { background: var(--dark2); position: relative; overflow: hidden; border: 1px solid transparent; transition: border-color 0.3s, transform 0.3s; }
+  .jersey-card:hover { border-color: rgba(201,168,76,0.3); transform: translateY(-3px); z-index: 2; }
+  .card-img { width: 100%; height: 260px; background: var(--dark3); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+  .card-img-placeholder { font-family: 'Bebas Neue', sans-serif; font-size: 5rem; color: rgba(201,168,76,0.12); letter-spacing: 2px; user-select: none; }
+  .badge-status { position: absolute; top: 12px; left: 12px; font-family: 'Space Mono', monospace; font-size: 0.5rem; letter-spacing: 2px; text-transform: uppercase; padding: 4px 10px; font-weight: 700; }
+  .badge-available { background: rgba(39,174,96,0.15); color: var(--green); border: 1px solid var(--green); }
+  .badge-sold { background: rgba(192,57,43,0.15); color: var(--red); border: 1px solid var(--red); }
+  .badge-reserved { background: rgba(201,168,76,0.15); color: var(--gold); border: 1px solid var(--gold); }
+  .card-body { padding: 18px 20px 20px; }
+  .card-club { font-family: 'Space Mono', monospace; font-size: 0.55rem; letter-spacing: 3px; text-transform: uppercase; color: var(--gold); margin-bottom: 5px; }
+  .card-name { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: 1px; line-height: 1; margin-bottom: 4px; }
+  .card-meta { font-size: 0.8rem; color: var(--gray); font-style: italic; margin-bottom: 14px; }
+  .card-price { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; color: var(--gold); letter-spacing: 1px; line-height: 1; }
+  .card-price-label { font-family: 'Space Mono', monospace; font-size: 0.45rem; letter-spacing: 2px; text-transform: uppercase; color: var(--gray); display: block; margin-bottom: 2px; }
+  .empty-state { grid-column: 1 / -1; text-align: center; padding: 100px 40px; color: var(--gray); }
+  .empty-state p { font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 3px; text-transform: uppercase; }
+  .size-select { background: var(--dark3); border: 1px solid rgba(201,168,76,0.3); color: var(--white); padding: 10px 14px; font-family: 'Cormorant Garamond', serif; font-size: 1rem; letter-spacing: 1px; outline: none; cursor: pointer; margin-top: 6px; width: 100%; }
+  .add-to-cart-btn { width: 100%; background: transparent; border: 1px solid rgba(201,168,76,0.4); color: var(--gold); padding: 8px; font-family: 'Space Mono', monospace; font-size: 0.55rem; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; margin-top: 8px; transition: all 0.2s; }
+  .add-to-cart-btn:hover { background: var(--gold); color: var(--black); }
+  .cart-icon-wrap { position: fixed; bottom: 30px; right: 30px; z-index: 150; background: var(--gold); color: var(--black); width: 54px; height: 54px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.4rem; transition: transform 0.2s; }
+  .cart-icon-wrap:hover { transform: scale(1.08); }
+  .cart-badge { position: absolute; top: -4px; right: -4px; background: var(--red); color: #fff; border-radius: 50%; width: 20px; height: 20px; font-family: 'Space Mono', monospace; font-size: 0.55rem; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .cart-panel { position: fixed; top: 0; right: -420px; z-index: 200; width: 400px; height: 100vh; background: var(--dark2); border-left: 1px solid rgba(201,168,76,0.2); display: flex; flex-direction: column; transition: right 0.3s ease; }
+  .cart-panel.open { right: 0; }
+  .cart-header { padding: 24px 28px; border-bottom: 1px solid rgba(201,168,76,0.15); display: flex; align-items: center; justify-content: space-between; }
+  .cart-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: 3px; color: var(--gold); }
+  .cart-close { background: none; border: none; color: var(--gray); font-size: 1.2rem; cursor: pointer; transition: color 0.2s; }
+  .cart-close:hover { color: var(--white); }
+  .cart-items { flex: 1; overflow-y: auto; padding: 16px 28px; }
+  .cart-item { display: flex; gap: 14px; align-items: center; padding: 14px 0; border-bottom: 1px solid rgba(201,168,76,0.1); }
+  .cart-item-img { width: 64px; height: 64px; object-fit: cover; background: var(--dark3); flex-shrink: 0; }
+  .cart-item-info { flex: 1; }
+  .cart-item-name { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 1px; color: var(--white); }
+  .cart-item-meta { font-family: 'Space Mono', monospace; font-size: 0.55rem; letter-spacing: 2px; color: var(--gray); margin-top: 3px; }
+  .cart-item-price { font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; color: var(--gold); }
+  .cart-item-remove { background: none; border: none; color: var(--gray); cursor: pointer; font-size: 0.8rem; transition: color 0.2s; }
+  .cart-item-remove:hover { color: var(--red); }
+  .cart-footer { padding: 20px 28px; border-top: 1px solid rgba(201,168,76,0.15); }
+  .cart-total { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px; }
+  .cart-total-label { font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 3px; text-transform: uppercase; color: var(--gray); }
+  .cart-total-val { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: var(--gold); }
+  .cart-checkout-btn { width: 100%; background: var(--gold); border: none; color: var(--black); padding: 14px; font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 3px; text-transform: uppercase; font-weight: 700; cursor: pointer; transition: background 0.2s; }
+  .cart-checkout-btn:hover { background: var(--gold-light); }
+  .cart-empty { text-align: center; padding: 60px 20px; font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 2px; color: var(--gray); text-transform: uppercase; }
+  .cart-overlay { position: fixed; inset: 0; z-index: 190; background: rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+  .cart-overlay.open { opacity: 1; pointer-events: all; }
+  .toast { position: fixed; bottom: 30px; left: 30px; z-index: 300; background: var(--dark2); border-left: 3px solid var(--gold); padding: 14px 24px; font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 2px; text-transform: uppercase; color: var(--white); opacity: 0; transform: translateY(10px); transition: all 0.3s; pointer-events: none; }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .product-overlay { position:fixed; inset:0; z-index:250; background:rgba(0,0,0,0.92); display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.25s; padding:20px; }
+  .product-overlay.open { opacity:1; pointer-events:all; }
+  .product-modal { background:var(--dark2); border:1px solid rgba(201,168,76,0.2); width:100%; max-width:860px; max-height:90vh; overflow-y:auto; display:grid; grid-template-columns:1fr 1fr; position:relative; }
+  .product-imgs { background:var(--dark3); min-height:420px; position:relative; overflow:hidden; }
+  .product-img-main { width:100%; height:420px; object-fit:cover; display:block; cursor:pointer; transition:opacity 0.3s; }
+  .product-img-placeholder { width:100%; height:420px; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:6rem; color:rgba(201,168,76,0.1); }
+  .product-thumb-bar { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); display:flex; gap:8px; }
+  .product-thumb { width:52px; height:52px; object-fit:cover; border:2px solid transparent; cursor:pointer; opacity:0.5; transition:all 0.2s; }
+  .product-thumb.active { border-color:var(--gold); opacity:1; }
+  .product-info { padding:36px 32px; display:flex; flex-direction:column; gap:14px; }
+  .product-nation { font-family:'Space Mono',monospace; font-size:0.55rem; letter-spacing:4px; text-transform:uppercase; color:var(--gold); }
+  .product-name { font-family:'Bebas Neue',sans-serif; font-size:1.9rem; letter-spacing:2px; line-height:1.05; }
+  .product-condition { font-size:0.95rem; color:var(--gray); font-style:italic; }
+  .product-price { font-family:'Bebas Neue',sans-serif; font-size:3rem; color:var(--gold); letter-spacing:2px; line-height:1; border-bottom:1px solid rgba(201,168,76,0.15); padding-bottom:14px; }
+  .product-label { font-family:'Space Mono',monospace; font-size:0.5rem; letter-spacing:3px; text-transform:uppercase; color:var(--gold); margin-bottom:6px; display:block; }
+  .product-select { background:var(--dark3); border:1px solid rgba(201,168,76,0.3); color:var(--white); padding:12px 16px; font-family:'Cormorant Garamond',serif; font-size:1.1rem; outline:none; width:100%; }
+  .product-input { background:var(--dark3); border:1px solid rgba(201,168,76,0.2); color:var(--white); padding:12px 16px; font-family:'Cormorant Garamond',serif; font-size:1.1rem; outline:none; width:100%; transition:border-color 0.2s; }
+  .product-input:focus, .product-select:focus { border-color:var(--gold); }
+  .product-input::placeholder { color:var(--gray); }
+  .product-free { font-family:'Bebas Neue',sans-serif; font-size:1rem; letter-spacing:2px; color:var(--green); }
+  .product-add-btn { background:var(--gold); border:none; color:var(--black); padding:16px; font-family:'Space Mono',monospace; font-size:0.65rem; letter-spacing:3px; text-transform:uppercase; font-weight:700; cursor:pointer; transition:background 0.2s; width:100%; }
+  .product-add-btn:hover { background:var(--gold-light); }
+  .product-close { position:absolute; top:12px; right:12px; background:rgba(0,0,0,0.7); border:1px solid rgba(201,168,76,0.3); color:var(--white); width:36px; height:36px; font-size:1rem; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:10; }
+  @media (max-width:640px) { .product-modal { grid-template-columns:1fr; } .product-imgs { min-height:260px; } .product-img-main { height:260px; } }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--black); }
+  ::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.3); }
+  @media (max-width: 600px) { header { padding: 0 20px; } .hero, .filters, .stats-bar { padding-left: 20px; padding-right: 20px; } .stats-bar { margin: 30px 20px; flex-wrap: wrap; } .catalog-grid { padding: 0 20px 60px; } nav { display: none; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Jersey<span>Drip</span></div>
+  <nav></nav>
+  <img src="JD__1_.png" alt="Logo" style="height:48px;width:48px;object-fit:contain;border-radius:50%;">
+</header>
+
+<section class="hero">
+  <p class="hero-label">Rivendita Premium di Maglie da Calcio</p>
+  <h1>Il Drop<br><em>è Reale.</em></h1>
+</section>
+
+<div class="stats-bar">
+  <div class="stat"><span class="stat-val" id="statTotal">0</span><span class="stat-label">Maglie Totali</span></div>
+  <div class="stat"><span class="stat-val" id="statAvail">0</span><span class="stat-label">Disponibili</span></div>
+  <div class="stat"><span class="stat-val" id="statSold">0</span><span class="stat-label">Vendute</span></div>
+</div>
+
+<div class="filters">
+  <button class="filter-btn active" onclick="setFilter('all',this)">Tutte</button>
+  <button class="filter-btn" onclick="setFilter('available',this)">Disponibili</button>
+  <button class="filter-btn" onclick="setFilter('reserved',this)">Prenotate</button>
+  <button class="filter-btn" onclick="setFilter('sold',this)">Vendute</button>
+  <select class="category-select" id="categorySelect" onchange="setCategory(this.value)">
+    <option value="all">— Categoria —</option>
+    <option value="nazionali">Nazionali</option>
+  </select>
+  <select class="category-select" id="subCategorySelect" onchange="setSubCategory(this.value)" style="display:none">
+    <option value="all">— Paese —</option>
+    <option value="argentina">Argentina</option>
+    <option value="belgio">Belgio</option>
+    <option value="brasile">Brasile</option>
+    <option value="francia">Francia</option>
+    <option value="germania">Germania</option>
+    <option value="inghilterra">Inghilterra</option>
+    <option value="spagna">Spagna</option>
+  </select>
+  <div class="search-wrap">
+    <input type="text" placeholder="Cerca maglie..." id="searchInput" oninput="renderCatalog()">
+    <span class="search-icon">🔍</span>
+  </div>
+</div>
+
+<div class="catalog-grid" id="catalogGrid"></div>
+
+<div class="product-overlay" id="productOverlay" onclick="closeProductOutside(event)">
+  <div class="product-modal" id="productModal">
+    <button class="product-close" onclick="closeProduct()">✕</button>
+    <div class="product-imgs">
+      <img class="product-img-main" id="productImgMain" src="" alt="">
+      <div class="product-thumb-bar" id="productThumbs"></div>
+    </div>
+    <div class="product-info">
+      <div class="product-nation" id="productNation"></div>
+      <div class="product-name" id="productName"></div>
+      <div class="product-condition" id="productCondition"></div>
+      <div class="product-price" id="productPrice"></div>
+      <div>
+        <span class="product-label">Taglia</span>
+        <select class="product-select" id="productSize">
+          <option value="">— Seleziona taglia —</option>
+          <option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option>
+        </select>
+      </div>
+      <div>
+        <span class="product-label">Nome sulla maglia</span>
+        <input class="product-input" type="text" id="productCustomName" placeholder="es. MESSI (opzionale)">
+      </div>
+      <div>
+        <span class="product-label">Numero sulla maglia</span>
+        <input class="product-input" type="text" id="productCustomNumber" placeholder="es. 10 (opzionale)">
+      </div>
+      <div class="product-free">✓ Personalizzazione gratuita</div>
+      <button class="product-add-btn" onclick="addToCartFromModal()">+ Aggiungi al carrello</button>
+    </div>
+  </div>
+</div>
+
+<div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+<div class="cart-panel" id="cartPanel">
+  <div class="cart-header">
+    <div class="cart-title">Il tuo carrello</div>
+    <button class="cart-close" onclick="toggleCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-footer">
+    <div class="cart-total">
+      <span class="cart-total-label">Totale</span>
+      <span class="cart-total-val" id="cartTotal">€0,00</span>
+    </div>
+    <button class="cart-checkout-btn" onclick="checkout()">Procedi al pagamento</button>
+  </div>
+</div>
+
+<div class="cart-icon-wrap" onclick="toggleCart()">
+  🛒
+  <div class="cart-badge" id="cartBadge" style="display:none">0</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const STORAGE_KEY = 'jerseydrip_v7';
+  let jerseys = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+
+  if (!jerseys.length) {
+    const base = { category:'nazionali', size:'S/M/L/XL/XXL', condition:'Mint / BNWT', price:34.99, buyPrice:0, status:'available', notes:'Nuova con cartellino' };
+    jerseys = [
+      { ...base, id:1, subCategory:'argentina', club:'Argentina', season:'2026', name:'Home Kit — World Cup 2026', imgFront:'argentina-front.jpg', imgBack:'argentina-back.webp' },
+      { ...base, id:2, subCategory:'argentina', club:'Argentina', season:'2026', name:'Away Kit — World Cup 2026', imgFront:'argentina-away-front.jpg', imgBack:'argentina-away-back.jpg' },
+      { ...base, id:3, subCategory:'brasile', club:'Brasile', season:'2026', name:'Home Kit — World Cup 2026', imgFront:'brasile-home-front.jpg', imgBack:'brasile-home-back.jpg' },
+      { ...base, id:4, subCategory:'brasile', club:'Brasile', season:'2026', name:'Away Kit — World Cup 2026', imgFront:'brasile-away-front.jpg', imgBack:'brasile-away-back.jpg' },
+      { ...base, id:5, subCategory:'spagna', club:'Spagna', season:'2026', name:'Home Kit — World Cup 2026', imgFront:'spagna-home-front.jpg', imgBack:'spagna-home-back.jpg' },
+      { ...base, id:6, subCategory:'spagna', club:'Spagna', season:'2026', name:'Away Kit — World Cup 2026', imgFront:'spagna-away-front.jpg', imgBack:'spagna-away-back.jpg' },
+      { ...base, id:7, subCategory:'francia', club:'Francia', season:'2026', name:'Home Kit — World Cup 2026', imgFront:'francia-home-front.jpg', imgBack:'francia-home-back.jpg' },
+      { ...base, id:8, subCategory:'francia', club:'Francia', season:'2026', name:'Away Kit — World Cup 2026', imgFront:'francia-away-front.jpg', imgBack:'francia-away-back.jpg' },
+      { ...base, id:9, subCategory:'belgio', club:'Belgio', season:'2026', name:'Home Kit — World Cup 2026', imgFront:'belgio-home-front.jpg', imgBack:'belgio-home-back.jpg' },
+      { ...base, id:10, subCategory:'belgio', club:'Belgio', season:'2026', name:'Away Kit — World Cup 2026', imgFront:'belgio-away-front.jpg', imgBack:'belgio-away-back.jpg' },
+      { ...base, id:11, subCategory:'inghilterra', club:'Inghilterra', season:'2026', name:'Home Kit — World Cup 2026', imgFront:'inghilterra-home-front.jpg', imgBack:'inghilterra-home-back.jpg' },
+      { ...base, id:12, subCategory:'inghilterra', club:'Inghilterra', season:'2026', name:'Away Kit — World Cup 2026', imgFront:'inghilterra-away-front.jpg', imgBack:'inghilterra-away-back.jpg' },
+      { ...base, id:13, subCategory:'germania', club:'Germania', season:'2026', name:'Home Kit — World Cup 2026', imgFront:'germania-home-front.jpg', imgBack:'germania-home-back.jpg' },
+      { ...base, id:14, subCategory:'germania', club:'Germania', season:'2026', name:'Away Kit — World Cup 2026', imgFront:'germania-away-front.jpg', imgBack:'germania-away-back.jpg' },
+    ];
+    save();
+  }
+
+  let currentFilter = 'all', currentCategory = 'all', currentSubCategory = 'all';
+  let cart = [];
+
+  function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(jerseys)); }
+
+  function setFilter(f, el) {
+    currentFilter = f;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    renderCatalog();
+  }
+
+  function setCategory(val) {
+    currentCategory = val; currentSubCategory = 'all';
+    const sub = document.getElementById('subCategorySelect');
+    sub.style.display = val === 'nazionali' ? '' : 'none';
+    if (val === 'nazionali') sub.value = 'all';
+    renderCatalog();
+  }
+
+  function setSubCategory(val) { currentSubCategory = val; renderCatalog(); }
+
+  function getFiltered() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    return jerseys.filter(j => {
+      const matchFilter = currentFilter === 'all' || j.status === currentFilter;
+      const matchCategory = currentCategory === 'all' || j.category === currentCategory;
+      const matchSub = currentSubCategory === 'all' || j.subCategory === currentSubCategory;
+      const matchSearch = !q || [j.club, j.name, j.season].some(f => f && f.toLowerCase().includes(q));
+      return matchFilter && matchCategory && matchSub && matchSearch;
+    });
+  }
+
+  function updateStats() {
+    const avail = jerseys.filter(j => j.status === 'available');
+    const sold = jerseys.filter(j => j.status === 'sold');
+    document.getElementById('statTotal').textContent = jerseys.length;
+    document.getElementById('statAvail').textContent = avail.length;
+    document.getElementById('statSold').textContent = sold.length;
+  }
+
+  function statusBadge(s) {
+    const map = { available:'badge-available', reserved:'badge-reserved', sold:'badge-sold' };
+    const labels = { available:'Disponibile', reserved:'Prenotata', sold:'Venduta' };
+    return `<div class="badge-status ${map[s]}">${labels[s]}</div>`;
+  }
+
+  function initials(club) { return club ? club.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,3) : '?'; }
+
+  function renderCatalog() {
+    const grid = document.getElementById('catalogGrid');
+    const list = getFiltered();
+    updateStats();
+    if (!list.length) {
+      grid.innerHTML = `<div class="empty-state"><p>Nessuna maglia trovata</p></div>`;
+      return;
+    }
+    grid.innerHTML = list.map(j => {
+      const imgFront = j.imgFront ? `<img src="${j.imgFront}" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;transition:opacity 0.4s;" class="img-front">` : '';
+      const imgBack = j.imgBack ? `<img src="${j.imgBack}" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;opacity:0;transition:opacity 0.4s;" class="img-back">` : '';
+      const placeholder = !j.imgFront ? `<div class="card-img-placeholder">${initials(j.club)}</div>` : '';
+      return `
+      <div class="jersey-card" onmouseenter="flipCard(this,true)" onmouseleave="flipCard(this,false)">
+        <div class="card-img" style="position:relative;cursor:pointer;" onclick="openProduct(${j.id})">${placeholder}${imgFront}${imgBack}</div>
+        <div class="card-body">
+          <div class="card-club">${j.subCategory ? j.subCategory.toUpperCase() : ''} · ${j.season || '—'}</div>
+          <div class="card-name">${j.name || 'Jersey'}</div>
+          <div class="card-meta">${j.condition === 'Mint / BNWT' ? 'Nuova con cartellino' : j.condition || ''}</div>
+          <div style="margin-bottom:12px;">
+            <span class="card-price-label">Prezzo</span>
+            <div class="card-price">€${parseFloat(j.price||0).toLocaleString('it-IT',{minimumFractionDigits:2})}</div>
+          </div>
+          <button class="add-to-cart-btn" onclick="openProduct(${j.id})">Acquista ora</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function flipCard(card, show) {
+    const front = card.querySelector('.img-front');
+    const back = card.querySelector('.img-back');
+    if (front && back) { front.style.opacity = show ? '0' : '1'; back.style.opacity = show ? '1' : '0'; }
+  }
+
+  let currentProductId = null;
+
+  function openProduct(id) {
+    const j = jerseys.find(x => x.id === id);
+    if (!j) return;
+    currentProductId = id;
+    document.getElementById('productNation').textContent = (j.subCategory ? j.subCategory.toUpperCase() : '') + (j.season ? ' · ' + j.season : '');
+    document.getElementById('productName').textContent = j.name || 'Jersey';
+    document.getElementById('productCondition').textContent = j.condition || '';
+    document.getElementById('productPrice').textContent = '€' + parseFloat(j.price||0).toLocaleString('it-IT',{minimumFractionDigits:2});
+    document.getElementById('productSize').value = '';
+    document.getElementById('productCustomName').value = '';
+    document.getElementById('productCustomNumber').value = '';
+    const mainImg = document.getElementById('productImgMain');
+    const thumbBar = document.getElementById('productThumbs');
+    if (j.imgFront) {
+      mainImg.src = j.imgFront;
+      mainImg.style.display = 'block';
+      document.querySelector('.product-img-placeholder') && (document.querySelector('.product-img-placeholder').style.display='none');
+      let thumbsHTML = `<img class="product-thumb active" src="${j.imgFront}" onclick="switchImg('${j.imgFront}', this)">`;
+      if (j.imgBack) thumbsHTML += `<img class="product-thumb" src="${j.imgBack}" onclick="switchImg('${j.imgBack}', this)">`;
+      thumbBar.innerHTML = thumbsHTML;
+    } else {
+      mainImg.style.display = 'none';
+      thumbBar.innerHTML = '';
+    }
+    document.getElementById('productOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function switchImg(src, thumb) {
+    document.getElementById('productImgMain').src = src;
+    document.querySelectorAll('.product-thumb').forEach(t => t.classList.remove('active'));
+    thumb.classList.add('active');
+  }
+
+  function closeProduct() {
+    document.getElementById('productOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+    currentProductId = null;
+  }
+
+  function closeProductOutside(e) { if (e.target === document.getElementById('productOverlay')) closeProduct(); }
+
+  function addToCartFromModal() {
+    const j = jerseys.find(x => x.id === currentProductId);
+    if (!j) return;
+    const size = document.getElementById('productSize').value;
+    if (!size) { showToast('Seleziona una taglia!'); return; }
+    const customName = document.getElementById('productCustomName').value.trim().toUpperCase();
+    const customNumber = document.getElementById('productCustomNumber').value.trim();
+    cart.push({ id:j.id, name:j.name, club:j.club, size, price:j.price, img:j.imgFront||'', qty:1, customName, customNumber });
+    updateCartUI();
+    closeProduct();
+    showToast(j.name + ' aggiunto al carrello ✓');
+  }
+
+  function removeFromCart(id, size) { cart = cart.filter(i => !(i.id===id && i.size===size)); updateCartUI(); }
+
+  function removeFromCart(id, size) { cart = cart.filter(i => !(i.id===id && i.size===size)); updateCartUI(); }
+
+  function updateCartUI() {
+    const total = cart.reduce((s,i) => s + i.price * i.qty, 0);
+    const count = cart.reduce((s,i) => s + i.qty, 0);
+    const badge = document.getElementById('cartBadge');
+    badge.style.display = count > 0 ? 'flex' : 'none';
+    badge.textContent = count;
+    document.getElementById('cartTotal').textContent = '€' + total.toLocaleString('it-IT',{minimumFractionDigits:2});
+    const itemsEl = document.getElementById('cartItems');
+    if (!cart.length) { itemsEl.innerHTML = '<div class="cart-empty">Il carrello è vuoto</div>'; return; }
+    itemsEl.innerHTML = cart.map(i => `
+      <div class="cart-item">
+        ${i.img ? `<img class="cart-item-img" src="${i.img}">` : `<div class="cart-item-img" style="display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:rgba(201,168,76,0.3);">${(i.club||'').slice(0,3).toUpperCase()}</div>`}
+        <div class="cart-item-info">
+          <div class="cart-item-name">${i.name}</div>
+          <div class="cart-item-meta">Taglia: ${i.size} · Qtà: ${i.qty}${i.customName ? ' · Nome: '+i.customName : ''}${i.customNumber ? ' · N°'+i.customNumber : ''}</div>
+        </div>
+        <div class="cart-item-price">€${(i.price*i.qty).toLocaleString('it-IT',{minimumFractionDigits:2})}</div>
+        <button class="cart-item-remove" onclick="removeFromCart(${i.id},'${i.size}')">✕</button>
+      </div>`).join('');
+  }
+
+  function toggleCart() {
+    document.getElementById('cartPanel').classList.toggle('open');
+    document.getElementById('cartOverlay').classList.toggle('open');
+  }
+
+  function checkout() {
+    if (!cart.length) { showToast('Il carrello è vuoto!'); return; }
+    showToast('Pagamento — prossimamente!');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  renderCatalog();
+  updateCartUI();
+</script>
+</body>
+</html>
